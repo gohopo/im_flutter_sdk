@@ -1,39 +1,22 @@
 import {
   FlutterPlugin,
   FlutterPluginBinding,
-  MethodCall,
-  MethodCallHandler,
-  MethodChannel,
-  MethodResult,
 } from '@ohos/flutter_ohos';
+import ClientWrapper from './ClientWrapper';
 
 /** ImFlutterSdkPlugin **/
-export default class ImFlutterSdkPlugin implements FlutterPlugin, MethodCallHandler {
-  private channel: MethodChannel | null = null;
-
-  constructor() {
-  }
+export default class ImFlutterSdkPlugin implements FlutterPlugin {
+  private clientWrapper: ClientWrapper | null = null;
 
   getUniqueClassName(): string {
     return "ImFlutterSdkPlugin"
   }
 
   onAttachedToEngine(binding: FlutterPluginBinding): void {
-    this.channel = new MethodChannel(binding.getBinaryMessenger(), "im_flutter_sdk");
-    this.channel.setMethodCallHandler(this)
+    this.clientWrapper = new ClientWrapper(binding);
   }
 
   onDetachedFromEngine(binding: FlutterPluginBinding): void {
-    if (this.channel != null) {
-      this.channel.setMethodCallHandler(null)
-    }
-  }
-
-  onMethodCall(call: MethodCall, result: MethodResult): void {
-    if (call.method == "getPlatformVersion") {
-      result.success("OpenHarmony ^ ^ ")
-    } else {
-      result.notImplemented()
-    }
+    this.clientWrapper?.unRegisterEaseListener();
   }
 }
