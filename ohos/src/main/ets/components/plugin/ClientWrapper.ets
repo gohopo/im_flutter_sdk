@@ -20,28 +20,41 @@ export default class ClientWrapper extends Wrapper{
     this.chatRoomManagerWrapper = new ChatRoomManagerWrapper(this.binding);
     this.conversationWrapper = new ConversationWrapper(this.binding);
   }
+  getCurrentUser(call: MethodCall, channelName: string, result: MethodResult) {
+    this.onSuccess(result,channelName,ChatClient.getInstance().getCurrentUser());
+  }
   init(call: MethodCall, channelName: string, result: MethodResult) {
-    if(!ChatClient.getInstance().isSdkInited()){
-      let options = EmHelper.optionsWithParam(call);
-      ChatClient.getInstance().init(this.context,options);
+    try{
+      if(!ChatClient.getInstance().isSdkInited()){
+        let options = EmHelper.optionsWithParam(call);
+        ChatClient.getInstance().init(this.context,options);
 
-      this.bindingManagers();
-      this.registerEaseListener();
+        this.bindingManagers();
+        this.registerEaseListener();
+      }
+      this.onSuccess(result,channelName,null);
     }
-    this.onSuccess(result,channelName,null);
+    catch (error){
+      this.onError(result,error);
+    }
   }
   async login(call: MethodCall, channelName: string, result: MethodResult) {
     let isPassword: boolean = call.argument('isPassword');
     let username: string = call.argument('username');
     let pwdOrToken: string = call.argument('pwdOrToken');
-
-    if(isPassword){
-      await ChatClient.getInstance().login(username,pwdOrToken);
+    try{
+      if(isPassword){
+        await ChatClient.getInstance().login(username,pwdOrToken);
+      }
+      else{
+        await ChatClient.getInstance().loginWithToken(username,pwdOrToken);
+      }
+      ChatClient.getInstance().getCurrentUser();
+      this.onSuccess(result,channelName,null);
     }
-    else{
-      await ChatClient.getInstance().loginWithToken(username,pwdOrToken);
+    catch (error){
+      this.onError(result,error);
     }
-    this.onSuccess(result,channelName,null);
   }
   logout(channelName: string, result: MethodResult) {
     ChatClient.getInstance().logout().then(()=> {
@@ -50,6 +63,9 @@ export default class ClientWrapper extends Wrapper{
   }
   onMethodCall(call: MethodCall, result: MethodResult){
     switch (call.method) {
+      case 'getCurrentUser':
+        this.getCurrentUser(call,call.method,result);
+        break;
       case 'init':
         this.init(call,call.method,result);
         break;

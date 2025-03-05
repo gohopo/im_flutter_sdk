@@ -17,8 +17,13 @@ export default class ChatManagerWrapper extends Wrapper{
     let convId: string = call.argument('convId');
     let createIfNeed: boolean = call.argument('createIfNeed')??true;
     let type: number = call.argument('type');
-    let conversation = ChatClient.getInstance().chatManager()?.getConversation(convId,type,createIfNeed);
-    this.onSuccess(result,channelName,EmHelper.conversationToJson(conversation));
+    try{
+      let conversation = ChatClient.getInstance().chatManager()?.getConversation(convId,type,createIfNeed);
+      this.onSuccess(result,channelName,EmHelper.conversationToJson(conversation));
+    }
+    catch (error){
+      this.onError(result,error);
+    }
   }
   onMethodCall(call: MethodCall, result: MethodResult){
     switch (call.method) {

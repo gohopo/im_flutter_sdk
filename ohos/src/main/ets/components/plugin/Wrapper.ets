@@ -16,7 +16,8 @@ export default class Wrapper implements MethodCallHandler{
     this.channel = new MethodChannel(binding.getBinaryMessenger(), Wrapper.CHANNEL_PREFIX + channelName, JSONMethodCodec.INSTANCE);
     this.channel.setMethodCallHandler(this);
   }
-  onError(result: MethodResult,error: ChatError){
+  onError(result: MethodResult,error: ChatError|ESObject){
+    if(!(error instanceof  ChatError)) error = new ChatError(ChatError.GENERAL_ERROR,error.toString());
     this.post(()=>{
       result.success({error});
     });
