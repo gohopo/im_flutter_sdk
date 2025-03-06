@@ -118,29 +118,34 @@ export default class ChatManagerWrapper extends Wrapper{
     ChatClient.getInstance().chatManager()?.addConversationListener(this.conversationListener);
   }
   sendMessage(call: MethodCall, channelName: string, result: MethodResult) {
-    let msg = EmHelper.messageFromParam(call);
-    let localId = msg.getMsgId();
-    msg.setMessageStatusCallback({
-      onSuccess: () => {
-        this.post(()=>this.messageChannel.invokeMethod('onMessageSuccess',{
-          message:EmHelper.messageToJson(msg),localId
-        }));
-      },
-      onProgress: (progress)=>{
-        this.post(()=>this.messageChannel.invokeMethod('onMessageProgressUpdate',{
-          progress,localId
-        }));
-      },
-      onError: (code, error)=>{
-        this.post(()=>this.messageChannel.invokeMethod('onMessageError',{
-          message:EmHelper.messageToJson(msg),localId,error:{
-            code,description:error
-          }
-        }));
-      }
-    });
-    ChatClient.getInstance().chatManager()?.sendMessage(msg);
-    this.onSuccess(result,channelName,EmHelper.messageToJson(msg));
+    try{
+      let msg = EmHelper.messageFromParam(call);
+      let localId = msg.getMsgId();
+      msg.setMessageStatusCallback({
+        onSuccess: () => {
+          this.post(()=>this.messageChannel.invokeMethod('onMessageSuccess',{
+            message:EmHelper.messageToJson(msg),localId
+          }));
+        },
+        onProgress: (progress)=>{
+          this.post(()=>this.messageChannel.invokeMethod('onMessageProgressUpdate',{
+            progress,localId
+          }));
+        },
+        onError: (code, error)=>{
+          this.post(()=>this.messageChannel.invokeMethod('onMessageError',{
+            message:EmHelper.messageToJson(msg),localId,error:{
+              code,description:error
+            }
+          }));
+        }
+      });
+      ChatClient.getInstance().chatManager()?.sendMessage(msg);
+      this.onSuccess(result,channelName,EmHelper.messageToJson(msg));
+    }
+    catch (error){
+      this.onError(result, error);
+    }
   }
   unRegisterEaseListener(){
     if(this.messageListener){

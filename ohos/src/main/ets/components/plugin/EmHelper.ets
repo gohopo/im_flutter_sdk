@@ -78,13 +78,14 @@ export default class EmHelper{
   }
   static messageFromParam(call: MethodCall){
     let message: ChatMessage;
-    let type: ContentType = call.argument('type');
+    let body: HashMap<string,ESObject> = call.argument('body');
+    let type: ContentType = body['type'];
     let direction: MessageDirection = call.argument('direction');
     if(direction==MessageDirection.SEND){
-      message = ChatMessage.createSendMessage(call.argument('to'),EmHelper.messageBodyFromJson(type,call.argument('body')),call.argument('chatType'));
+      message = ChatMessage.createSendMessage(call.argument('to'),EmHelper.messageBodyFromJson(type,body),call.argument('chatType'));
     }
     else{
-      message = ChatMessage.createReceiveMessage(call.argument('from'),EmHelper.messageBodyFromJson(type,call.argument('body')),call.argument('chatType'),call.argument('msgId'));
+      message = ChatMessage.createReceiveMessage(call.argument('from'),EmHelper.messageBodyFromJson(type,body),call.argument('chatType'),call.argument('msgId'));
     }
     message.setDirection(direction);
     message.setReceiverRead(call.argument('hasReadAck'));
