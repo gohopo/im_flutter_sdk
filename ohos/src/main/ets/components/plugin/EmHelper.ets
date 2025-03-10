@@ -12,9 +12,32 @@ import { ChatClient, ChatMessage,
   RecallMessageInfo,
   TextMessageBody } from "@easemob/chatsdk";
 import { MethodCall } from "@ohos/flutter_ohos";
+import { common } from '@kit.AbilityKit';
 import { HashMap } from "@kit.ArkTS";
 
 export default class EmHelper{
+  static uiContext: common.UIAbilityContext | null = null;
+  static alert(message: string){
+    return new Promise<void>((resolve: Function) => {
+      EmHelper.uiContext?.windowStage
+        .getMainWindowSync()
+        .getUIContext()
+        .showAlertDialog({
+          title:'提示',message,
+          onWillDismiss: (dismissDialogAction: DismissDialogAction)=>{
+            resolve();
+            dismissDialogAction.dismiss();
+          }
+        });
+    });
+  }
+  static delay(milliseconds: number){
+    return new Promise<void>((resolve: Function) => {
+      setTimeout(()=>{
+        resolve();
+      }, milliseconds);
+    });
+  }
   static conversationToJson(conversation: Conversation|null|undefined){
     if(!conversation) return null;
     let data: HashMap<string,ESObject> = new HashMap<string,ESObject>();

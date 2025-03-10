@@ -1,11 +1,14 @@
 import {
+  AbilityAware,
+  AbilityPluginBinding,
   FlutterPlugin,
   FlutterPluginBinding,
 } from '@ohos/flutter_ohos';
 import ClientWrapper from './ClientWrapper';
+import EmHelper from './EmHelper';
 
 /** ImFlutterSdkPlugin **/
-export default class ImFlutterSdkPlugin implements FlutterPlugin {
+export default class ImFlutterSdkPlugin implements FlutterPlugin, AbilityAware {
   private clientWrapper: ClientWrapper | null = null;
 
   getUniqueClassName(): string {
@@ -18,5 +21,13 @@ export default class ImFlutterSdkPlugin implements FlutterPlugin {
 
   onDetachedFromEngine(binding: FlutterPluginBinding): void {
     this.clientWrapper?.unRegisterEaseListener();
+  }
+
+  onAttachedToAbility(binding: AbilityPluginBinding): void {
+    EmHelper.uiContext = binding.getAbility().context;
+  }
+
+  onDetachedFromAbility(): void {
+    EmHelper.uiContext = null;
   }
 }

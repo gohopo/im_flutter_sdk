@@ -51,7 +51,8 @@ export default class ChatManagerWrapper extends Wrapper{
       this.onError(result,new ChatError(500,'The message was not found'));
     }
   }
-  registerEaseListener(){
+  async registerEaseListener(){
+    await EmHelper.delay(500);
     this.unRegisterEaseListener();
 
     this.messageListener = {
